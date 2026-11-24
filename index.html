@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#09090d">
+<title>Operação 15 Anos — Contagem Regressiva</title>
+<style>
+  :root { color-scheme: dark; --red:#ff343d; --muted:#a7a7b2; }
+  * { box-sizing:border-box }
+  body {
+    margin:0; min-height:100vh; overflow-x:hidden; color:#fff;
+    font-family:Arial,Helvetica,sans-serif;
+    background:
+      radial-gradient(ellipse at 50% 38%, rgba(143,16,28,.28), transparent 45%),
+      radial-gradient(ellipse at 10% 90%, rgba(100,12,24,.18), transparent 35%),
+      linear-gradient(145deg,#050507,#111117 55%,#08080c);
+    display:grid; place-items:center; padding:28px 16px; position:relative;
+  }
+  body:before, body:after {
+    content:""; position:fixed; inset:-30%; pointer-events:none;
+    background:conic-gradient(from 0deg,transparent 0 35%,rgba(255,40,52,.045) 40%,transparent 48% 100%);
+    animation:rotate 45s linear infinite;
+  }
+  body:after { animation-direction:reverse; animation-duration:65s; opacity:.55 }
+  @keyframes rotate { to { transform:rotate(360deg) } }
+  .shell { width:min(920px,100%); position:relative; z-index:1; text-align:center; }
+  .eyebrow { color:#ff6870; letter-spacing:.32em; font-size:.7rem; font-weight:700; }
+  h1 { margin:20px 0 8px; font-size:clamp(2.3rem,8vw,5.6rem); line-height:.95; letter-spacing:.035em; text-transform:uppercase; text-shadow:0 0 28px #c51e2b66; }
+  h1 span { color:var(--red); }
+  .subtitle { color:#c5c5ce; letter-spacing:.16em; font-size:clamp(.72rem,2vw,.95rem); margin:18px 0 42px; }
+  .status { display:flex; align-items:center; justify-content:center; gap:10px; color:#aaaab4; font-size:.72rem; letter-spacing:.18em; margin-bottom:18px; }
+  .dot { width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 13px var(--red);animation:pulse 1.4s infinite }
+  @keyframes pulse { 50% { opacity:.35; transform:scale(.75) } }
+  .timer { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(8px,2vw,18px); }
+  .unit { padding:clamp(14px,3vw,26px) 8px; background:linear-gradient(180deg,#1c1c24dd,#101016ee); border:1px solid #6e252d; border-radius:12px; box-shadow:inset 0 1px #ffffff0d,0 14px 40px #0008; }
+  .number { display:block; color:#fff; font-variant-numeric:tabular-nums; font-size:clamp(2rem,8vw,5.1rem); font-weight:800; line-height:1; text-shadow:0 0 22px #ff343d55; }
+  .label { display:block; margin-top:12px; color:#ff737b; font-size:clamp(.58rem,1.7vw,.78rem); letter-spacing:.18em; font-weight:700; }
+  .message { margin:36px auto 0; max-width:680px; color:#d4d4dc; font-size:clamp(1rem,2.6vw,1.25rem); line-height:1.6; }
+  .message strong { color:#ff5962; }
+  .date { margin-top:20px; color:#8e8e9a; letter-spacing:.18em; font-size:.8rem; }
+  .footer { margin-top:54px; color:#666672; font-size:.65rem; letter-spacing:.16em; }
+  .finished { display:none; margin-top:28px; color:#ff5962; font-weight:800; letter-spacing:.15em; font-size:clamp(1.2rem,4vw,2rem); }
+
+  .intro {
+    position:fixed; inset:0; z-index:5; display:grid; place-items:center;
+    padding:24px; text-align:center; background:
+      radial-gradient(circle at center,rgba(125,12,25,.30),transparent 42%),
+      linear-gradient(135deg,#030306,#111017 60%,#050507);
+    transition:opacity 1s ease, visibility 1s ease;
+  }
+  .intro:before {
+    content:""; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.018) 4px);
+  }
+  .intro.hidden { opacity:0; visibility:hidden; }
+  .intro-content { position:relative; max-width:760px; }
+  .intro-kicker { color:#ff737b; letter-spacing:.35em; font-size:.7rem; font-weight:700; }
+  .intro-title { margin:22px 0 12px; font-size:clamp(2.4rem,9vw,6rem); line-height:.9; text-transform:uppercase; letter-spacing:.04em; text-shadow:0 0 35px #ed1e32a0; }
+  .intro-title span { color:var(--red); }
+  .intro-copy { color:#c6c3ce; letter-spacing:.16em; font-size:clamp(.72rem,2.4vw,1rem); line-height:1.8; margin:22px auto 34px; }
+  .start-btn {
+    border:1px solid #ff535d; color:#fff; background:linear-gradient(180deg,#a91626,#5b0d18);
+    padding:15px 27px; border-radius:4px; letter-spacing:.18em; font-weight:700;
+    cursor:pointer; box-shadow:0 0 28px #e51d353f; transition:transform .2s,box-shadow .2s;
+  }
+  .start-btn:hover { transform:translateY(-2px); box-shadow:0 0 38px #e51d3570; }
+  .intro-line { width:min(300px,70vw); height:1px; margin:24px auto; background:linear-gradient(90deg,transparent,#d52a39,transparent); }
+  .reveal { animation:reveal 1.2s ease both; }
+  @keyframes reveal { from { opacity:0; transform:translateY(18px); letter-spacing:.2em } to { opacity:1; transform:translateY(0); } }
+
+  @media(max-width:520px) {
+    .timer { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .subtitle { margin-bottom:30px; }
+  }
+  @media(prefers-reduced-motion:reduce) { *,*:before,*:after { animation:none!important; } }
+</style>
+</head>
+<body>
+
+<div class="intro" id="intro">
+  <div class="intro-content">
+    <div class="intro-kicker reveal">PROTOCOLO ESPECIAL · 21.09.2030</div>
+    <div class="intro-line"></div>
+    <h2 class="intro-title reveal">UMA NOVA<br><span>ERA COMEÇA</span></h2>
+    <p class="intro-copy reveal">HÁ DATAS QUE MERECEM SER LEMBRADAS.<br>HÁ MOMENTOS QUE MERECEM UMA CONTAGEM.</p>
+    <button class="start-btn" id="startBtn">INICIAR CONTAGEM</button>
+    <div class="intro-line"></div>
+    <div class="intro-kicker">ARQUIVO: JOÃO · MISSÃO 15 ANOS</div>
+  </div>
+</div>
+
+<main class="shell">
+  <div class="eyebrow">ARQUIVO ESPECIAL · ACESSO AUTORIZADO</div>
+  <h1>Operação <span>João</span></h1>
+  <div class="eyebrow" style="margin-top:10px;font-size:.9rem;letter-spacing:.22em">MISSÃO: 15 ANOS</div>
+  <p class="subtitle">UMA NOVA ERA ESTÁ PRESTES A COMEÇAR</p>
+
+  <div class="status"><span class="dot"></span> CONTAGEM REGRESSIVA ATIVA</div>
+  <section class="timer" aria-label="Tempo restante até o aniversário">
+    <div class="unit"><span class="number" id="days">---</span><span class="label">DIAS</span></div>
+    <div class="unit"><span class="number" id="hours">--</span><span class="label">HORAS</span></div>
+    <div class="unit"><span class="number" id="minutes">--</span><span class="label">MINUTOS</span></div>
+    <div class="unit"><span class="number" id="seconds">--</span><span class="label">SEGUNDOS</span></div>
+  </section>
+
+  <p class="message">Alguns momentos merecem uma contagem especial.<br>
+    <strong>João, 15 anos, milhares de possibilidades e o começo de um novo capítulo.</strong>
+  </p>
+  <div class="date">21 · SETEMBRO · 2030</div>
+  <div class="finished" id="finished">CHEGOU A HORA. QUE COMECE A CELEBRAÇÃO!</div>
+  <div class="footer">UMA DATA · UMA HISTÓRIA · UM DIA INESQUECÍVEL</div>
+</main>
+<script>
+  // A contagem considera o início de 21/09/2030 no fuso de São Paulo.
+  // UTC-3 nessa data: 21/09/2030 às 00:00 em São Paulo = 2030-09-21T03:00:00Z.
+  const target = new Date("2030-09-21T03:00:00Z").getTime();
+  const ids = ["days", "hours", "minutes", "seconds"];
+  const pad = n => String(n).padStart(2, "0");
+
+  function updateCountdown() {
+    const remaining = target - Date.now();
+    if (remaining <= 0) {
+      ids.forEach(id => document.getElementById(id).textContent = "00");
+      document.getElementById("finished").style.display = "block";
+      document.querySelector(".status").textContent = "DATA ESPECIAL ALCANÇADA";
+      return;
+    }
+    const days = Math.floor(remaining / 86400000);
+    const hours = Math.floor((remaining % 86400000) / 3600000);
+    const minutes = Math.floor((remaining % 3600000) / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    document.getElementById("days").textContent = days.toLocaleString("pt-BR");
+    document.getElementById("hours").textContent = pad(hours);
+    document.getElementById("minutes").textContent = pad(minutes);
+    document.getElementById("seconds").textContent = pad(seconds);
+  }
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // Abertura cinematográfica: o visitante inicia a experiência.
+  document.getElementById("startBtn").addEventListener("click", () => {
+    const intro = document.getElementById("intro");
+    intro.classList.add("hidden");
+    document.querySelector(".shell").classList.add("reveal");
+  });
+</script>
+</body>
+</html>
